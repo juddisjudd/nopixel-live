@@ -7,7 +7,7 @@ NoPixel Live is a [Tauri 2](https://v2.tauri.app/) app. The window is Svelte 5 a
 - Windows 10 or 11.
 - Node.js LTS and pnpm 11.
 - Rust stable, 1.90 or later.
-- Streamlink 6 or later and VLC or mpv, to test playback.
+- VLC or mpv, to test playback. The app can install Streamlink itself.
 
 ## Run it
 
@@ -23,7 +23,7 @@ pnpm tauri build  # installer in src-tauri/target/release/bundle/nsis
 pnpm check  # Svelte and TypeScript
 pnpm lint   # clippy, warnings fail
 pnpm test   # Rust unit tests
-cargo test --manifest-path src-tauri/Cargo.toml -- --ignored   # calls the live Twitch and Kick endpoints
+cargo test --manifest-path src-tauri/Cargo.toml -- --ignored   # calls Twitch and Kick, downloads Streamlink
 ```
 
 ## Automatic builds
@@ -62,7 +62,9 @@ Both sources are the endpoints that twitch.tv and kick.com use in the browser. T
 | `src-tauri/src/kick.rs` | Kick event and channel parsing |
 | `src-tauri/src/merge.rs` | Joins channels into one streamer per person |
 | `src-tauri/src/poller.rs` | Poll loop, favorite notifications |
-| `src-tauri/src/player.rs` | Finds and launches Streamlink |
+| `src-tauri/src/player.rs` | Finds Streamlink, VLC, and mpv, and launches Streamlink |
+| `src-tauri/src/install.rs` | Downloads, checks, and unpacks the portable Streamlink build |
+| `src-tauri/src/chat.rs` | Opens popout chat in a window or the browser |
 | `src-tauri/src/settings.rs` | Settings file, defaults, and input cleanup |
 | `src/App.svelte` | Main window |
 | `src/lib/StreamerTile.svelte` | One streamer |

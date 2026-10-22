@@ -21,6 +21,13 @@ impl Platform {
             Platform::Kick => format!("https://kick.com/{login}"),
         }
     }
+
+    pub fn chat_url(self, login: &str) -> String {
+        match self {
+            Platform::Twitch => format!("https://www.twitch.tv/popout/{login}/chat?popout="),
+            Platform::Kick => format!("https://kick.com/popout/{login}/chat"),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]

@@ -1,5 +1,6 @@
 use std::collections::HashSet;
 use std::path::PathBuf;
+use std::sync::atomic::AtomicBool;
 use std::sync::{PoisonError, RwLock};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
@@ -21,14 +22,16 @@ const MAX_KICK_LOOKUPS: usize = 50;
 
 pub struct AppState {
     pub settings_path: PathBuf,
+    pub streamlink_dir: PathBuf,
     pub client: reqwest::Client,
     pub refresh: Notify,
+    pub installing: AtomicBool,
     settings: RwLock<Settings>,
     snapshot: RwLock<Snapshot>,
 }
 
 impl AppState {
-    pub fn new(settings_path: PathBuf) -> Result<Self, reqwest::Error> {
+    pub fn new(settings_path: PathBuf, streamlink_dir: PathBuf) -> Result<Self, reqwest::Error> {
         let client = reqwest::Client::builder()
             .user_agent(USER_AGENT)
             .timeout(Duration::from_secs(20))
@@ -36,8 +39,10 @@ impl AppState {
         Ok(Self {
             settings: RwLock::new(Settings::load(&settings_path)),
             settings_path,
+            streamlink_dir,
             client,
             refresh: Notify::new(),
+            installing: AtomicBool::new(false),
             snapshot: RwLock::new(Snapshot::default()),
         })
     }
@@ -483,7 +488,8 @@ mod tests {
     #[tokio::test]
     #[ignore = "calls the live Twitch and Kick endpoints"]
     async fn live_endpoints_return_streamers() {
-        let state = AppState::new(std::env::temp_dir().join("nopixel-live-none.json")).unwrap();
+        let temp = std::env::temp_dir();
+        let state = AppState::new(temp.join("nopixel-live-none.json"), temp).unwrap();
         let snapshot = collect(&state.client, &Settings::default()).await;
         let count = |p: Platform| {
             snapshot

@@ -1,6 +1,6 @@
 # NoPixel Live
 
-See every live NoPixel streamer on Twitch and Kick in one window. Click a stream to watch it in VLC.
+See every live NoPixel streamer on Twitch and Kick in one window. Click a stream to watch it in VLC or mpv, with the streamer's chat next to it.
 
 **[Download for Windows](../../releases/latest)**
 
@@ -15,16 +15,16 @@ See every live NoPixel streamer on Twitch and Kick in one window. Click a stream
 
 You need Windows 10 or 11. Setup takes about 5 minutes.
 
-1. Install **Streamlink**. It gets the video from Twitch and Kick. Open the [Streamlink download page](https://github.com/streamlink/windows-builds/releases/latest), click the file that ends in `x86_64.exe`, and run it.
-2. Install **VLC**. It plays the video. Get it from [videolan.org](https://www.videolan.org/vlc/).
-3. Open the [NoPixel Live download page](../../releases/latest). Under **Assets**, click the file that ends in `setup.exe`.
-4. Run the file you downloaded.
+1. Install **VLC**. It plays the video. Get it from [videolan.org](https://www.videolan.org/vlc/). If you prefer mpv, you can pick it in Settings later.
+2. Open the [NoPixel Live download page](../../releases/latest). Under **Assets**, click the file that ends in `setup.exe`.
+3. Run the file you downloaded.
+4. Open NoPixel Live. If it says Streamlink is needed, click **Install Streamlink**. Streamlink is the free tool that gets the video from Twitch and Kick. The install takes about a minute and does not ask for admin rights.
 
 Windows may say "Windows protected your PC". It says this because the app is not signed with a paid certificate. Click **More info**, then **Run anyway**.
 
 ## Watch a stream
 
-- Click the picture of a stream to play it. VLC opens after a few seconds.
+- Click the picture of a stream to play it. The video opens in your player after a few seconds, and the streamer's chat opens in a small window.
 - Click **Twitch** or **Kick** under a stream to choose the site.
 - Click the small box with an arrow next to a site to open the stream in your web browser.
 - Click the star to make a streamer a favorite.
@@ -46,10 +46,13 @@ Click the sliders icon at the top right. Click **Save** when you are done.
 
 | Setting | What it does |
 | --- | --- |
-| Streamlink and Player | Where Streamlink and your video player are installed. Leave them empty and the app finds them. mpv also works as a player. |
+| Player | Pick VLC or mpv. The app shows where it found the player, or a link to get it. |
+| Streamlink | Shows where Streamlink is, or an **Install Streamlink** button if it is missing. |
+| Open chat when a stream plays | **In a window** opens the chat in a small window. **In my browser** opens it in your web browser. **Off** opens no chat. |
 | Quality | Video quality. `best` is the highest. Pick `720p60,best` to use less internet data. |
 | Play first on | Which site the picture plays when a streamer is live on both. |
 | Extra Streamlink options | Extra options for Streamlink, for example `--twitch-low-latency`. |
+| Custom locations | Only needed if Streamlink or your player is in an unusual folder. Enter the full path to the `.exe` file. |
 | Twitch tags | The Twitch tags that mark a NoPixel stream. |
 | Kick event | The Kick event page that lists NoPixel streams. |
 | Only this category | Hides streams of other games. The default is Grand Theft Auto V. Leave it empty to show every game. |
@@ -61,11 +64,14 @@ Click the sliders icon at the top right. Click **Save** when you are done.
 
 ## Fix a problem
 
-**"Streamlink was not found"**
-Install Streamlink (step 1 above). If you installed it in a different folder, open Settings and enter the full path to `streamlink.exe`.
+**"Streamlink is not installed"**
+Click **Install Streamlink** at the top of the window. If the install fails, check your internet connection and click **Try again**.
 
 **A stream does not play**
-The app shows the reason at the bottom left. Check that VLC is installed. For Kick, Streamlink needs Microsoft Edge or Google Chrome. Edge comes with Windows, so this works unless you removed it.
+The app shows the reason at the bottom left. Check that your player is installed. For Kick, Streamlink needs Microsoft Edge or Google Chrome. Edge comes with Windows, so this works unless you removed it.
+
+**I cannot type in chat**
+Log in to Twitch or Kick inside the chat window. Or open Settings and set **Open chat when a stream plays** to **In my browser**, where you are probably logged in already.
 
 **A streamer is missing**
 The app finds Twitch streams by their NoPixel tags and Kick streams by the NoPixel event page. If a streamer uses neither, open Settings and add them under **Added channels**.
@@ -85,11 +91,12 @@ To remove the app, open Windows **Settings**, go to **Apps** > **Installed apps*
 ## Privacy
 
 - The app has no account and never asks for a password.
-- It only talks to Twitch and Kick, the same way their websites do.
-- Your settings stay on your computer, in `%APPDATA%\dev.nopixellive.app\settings.json`.
+- It talks to Twitch and Kick, the same way their websites do.
+- When you click **Install Streamlink**, it downloads Streamlink from [its official GitHub page](https://github.com/streamlink/windows-builds) and checks the file before using it.
+- Your settings stay on your computer, in `%APPDATA%\dev.nopixellive.app\settings.json`. Streamlink installed by the app goes in `%LOCALAPPDATA%\dev.nopixellive.app\streamlink`.
 
 ## About
 
-NoPixel Live is a fan project. It is not made by or connected to NoPixel, Twitch, or Kick.
+NoPixel Live is a fan project. It is not made by or connected to NoPixel, Twitch, or Kick. The NoPixel logo belongs to NoPixel.
 
 To build the app yourself or change the code, see [DEVELOPMENT.md](DEVELOPMENT.md).

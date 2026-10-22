@@ -1,20 +1,33 @@
 <script lang="ts">
   import Icon from './Icon.svelte'
-  import { PLATFORM_LABEL } from './format'
-  import type { AddedChannel, Favorite, Hidden, Link, Platform, Settings, Tools } from './types'
+  import StreamlinkInstall, { type InstallState } from './StreamlinkInstall.svelte'
+  import { api } from './api'
+  import { PLATFORM_LABEL, PLAYER_LABEL } from './format'
+  import type { AddedChannel, ChatMode, Favorite, Hidden, Link, Platform, Player, Settings, Tools } from './types'
 
   interface Props {
     settings: Settings
     tools: Tools | null
+    install: InstallState
+    oninstall: () => void
     onsave: (settings: Settings) => Promise<void>
     onclose: () => void
   }
 
-  let { settings, tools, onsave, onclose }: Props = $props()
+  let { settings, tools, install, oninstall, onsave, onclose }: Props = $props()
+
+  const PLAYERS: Player[] = ['vlc', 'mpv']
+  const CHAT_MODES: { value: ChatMode; label: string }[] = [
+    { value: 'window', label: 'In a window' },
+    { value: 'browser', label: 'In my browser' },
+    { value: 'off', label: 'Off' },
+  ]
 
   interface Form {
     streamlinkPath: string
+    player: Player
     playerPath: string
+    chat: ChatMode
     quality: string
     extraArgs: string
     preferredPlatform: Platform
@@ -36,7 +49,9 @@
   function toForm(s: Settings): Form {
     return {
       streamlinkPath: s.streamlinkPath,
+      player: s.player,
       playerPath: s.playerPath,
+      chat: s.chat,
       quality: s.quality,
       extraArgs: s.extraArgs,
       preferredPlatform: s.preferredPlatform,
@@ -59,7 +74,9 @@
   function fromForm(f: Form): Settings {
     return {
       streamlinkPath: f.streamlinkPath,
+      player: f.player,
       playerPath: f.playerPath,
+      chat: f.chat,
       quality: f.quality,
       extraArgs: f.extraArgs,
       preferredPlatform: f.preferredPlatform,
@@ -84,7 +101,7 @@
   let error = $state<string | null>(null)
   let dialog = $state<HTMLDialogElement>()
 
-  let streamlinkMissing = $derived(!tools?.streamlink && !form.streamlinkPath.trim())
+  let playerFound = $derived(tools?.[form.player] ?? null)
   let addedGroups = $derived(
     [...new Set(form.added.map((a) => a.login))].map((login) => ({
       login,
@@ -157,25 +174,56 @@
     <div class="body">
       <fieldset>
         <legend>Playback</legend>
-        <label>
-          Streamlink
-          <input
-            bind:value={form.streamlinkPath}
-            placeholder={tools?.streamlink ? `Auto: ${tools.streamlink}` : 'Path to streamlink.exe'}
-            spellcheck="false"
-          />
-        </label>
-        {#if streamlinkMissing}
-          <p class="problem">Streamlink is not installed in a usual place. Enter the path to streamlink.exe.</p>
-        {/if}
-        <label>
-          Player
-          <input
-            bind:value={form.playerPath}
-            placeholder={tools?.player ? `Auto: ${tools.player}` : "Auto: Streamlink's default"}
-            spellcheck="false"
-          />
-        </label>
+        <div class="field" role="radiogroup" aria-labelledby="player-label">
+          <span id="player-label">Player</span>
+          <div class="segmented">
+            {#each PLAYERS as choice (choice)}
+              <label class={['segment', form.player === choice && 'on']}>
+                <input
+                  type="radio"
+                  name="player"
+                  value={choice}
+                  bind:group={form.player}
+                  onchange={() => (form.playerPath = '')}
+                />
+                <span>{PLAYER_LABEL[choice]}</span>
+              </label>
+            {/each}
+          </div>
+          {#if form.playerPath.trim()}
+            <p class="note">Uses the location under Custom locations.</p>
+          {:else if playerFound}
+            <p class="note path">Found at {playerFound}</p>
+          {:else}
+            <p class="problem">
+              {PLAYER_LABEL[form.player]} is not installed.
+              <button type="button" class="text-button" onclick={() => api.openPlayerDownload(form.player)}>
+                Get {PLAYER_LABEL[form.player]}
+              </button>
+            </p>
+          {/if}
+        </div>
+        <div class="field">
+          <span>Streamlink</span>
+          {#if form.streamlinkPath.trim()}
+            <p class="note">Uses the location under Custom locations.</p>
+          {:else if tools?.streamlink}
+            <p class="note path">Found at {tools.streamlink}</p>
+          {:else}
+            <StreamlinkInstall {install} {oninstall} />
+          {/if}
+        </div>
+        <div class="field" role="radiogroup" aria-labelledby="chat-label">
+          <span id="chat-label">Open chat when a stream plays</span>
+          <div class="segmented">
+            {#each CHAT_MODES as mode (mode.value)}
+              <label class={['segment', form.chat === mode.value && 'on']}>
+                <input type="radio" name="chat" value={mode.value} bind:group={form.chat} />
+                <span>{mode.label}</span>
+              </label>
+            {/each}
+          </div>
+        </div>
         <div class="pair">
           <label>
             Quality
@@ -205,6 +253,25 @@
           Extra Streamlink options
           <input bind:value={form.extraArgs} placeholder="--twitch-low-latency" spellcheck="false" />
         </label>
+        <details open={!!(settings.streamlinkPath || settings.playerPath)}>
+          <summary>Custom locations</summary>
+          <label>
+            Streamlink location
+            <input
+              bind:value={form.streamlinkPath}
+              placeholder={tools?.streamlink ? `Auto: ${tools.streamlink}` : 'Path to streamlink.exe'}
+              spellcheck="false"
+            />
+          </label>
+          <label>
+            {PLAYER_LABEL[form.player]} location
+            <input
+              bind:value={form.playerPath}
+              placeholder={playerFound ? `Auto: ${playerFound}` : `Path to ${form.player}.exe`}
+              spellcheck="false"
+            />
+          </label>
+        </details>
       </fieldset>
 
       <fieldset>
@@ -479,6 +546,7 @@
   }
 
   .segmented {
+    justify-self: start;
     display: flex;
     height: 36px;
     border: 1px solid var(--line);
@@ -593,6 +661,29 @@
   .note {
     font-size: 14px;
     color: var(--muted);
+  }
+
+  .path {
+    overflow-wrap: anywhere;
+  }
+
+  .text-button {
+    padding: 0;
+    border: 0;
+    background: none;
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  details label {
+    margin-top: 12px;
+  }
+
+  summary {
+    font-size: 14px;
+    color: var(--muted);
+    cursor: pointer;
   }
 
   .problem {

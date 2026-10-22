@@ -1,11 +1,21 @@
 <script lang="ts">
   import { onMount } from 'svelte'
   import Icon from './lib/Icon.svelte'
+  import Logo from './lib/Logo.svelte'
   import SettingsPanel from './lib/SettingsPanel.svelte'
   import StreamerTile from './lib/StreamerTile.svelte'
-  import { api, onPlayerError, onSnapshot } from './lib/api'
-  import { DEFAULT_CATEGORY, PLATFORM_LABEL, ago, matchesQuery, matchesSite, type SiteFilter } from './lib/format'
-  import type { Platform, Settings, Snapshot, Streamer, Tools } from './lib/types'
+  import StreamlinkInstall, { type InstallState } from './lib/StreamlinkInstall.svelte'
+  import { api, onInstallProgress, onPlayerError, onSnapshot } from './lib/api'
+  import {
+    DEFAULT_CATEGORY,
+    PLATFORM_LABEL,
+    PLAYER_LABEL,
+    ago,
+    matchesQuery,
+    matchesSite,
+    type SiteFilter,
+  } from './lib/format'
+  import type { Platform, Player, Settings, Snapshot, Streamer, Tools } from './lib/types'
 
   interface Toast {
     id: number
@@ -31,10 +41,14 @@
   let now = $state(Date.now())
   let toasts = $state<Toast[]>([])
   let search = $state<HTMLInputElement>()
+  let install = $state<InstallState>({ running: false, progress: null, error: null })
   let nextToastId = 0
 
   let loading = $derived(snapshot.updatedAt === null)
   let preferred = $derived<Platform>(settings?.preferredPlatform ?? 'twitch')
+  let player = $derived<Player>(settings?.player ?? 'vlc')
+  let needsStreamlink = $derived(!!tools && !!settings && !settings.streamlinkPath && !tools.streamlink)
+  let needsPlayer = $derived(!!tools && !!settings && !settings.playerPath && !tools[player])
   let favoriteKeys = $derived(new Set(settings?.favorites.map((f) => f.key) ?? []))
   let searched = $derived(snapshot.streamers.filter((s) => matchesQuery(s, query)))
   let counts = $derived(
@@ -56,7 +70,7 @@
     ]
     api.snapshot().then(applySnapshot)
     api.settings().then((s) => (settings = s))
-    api.detectTools().then((t) => (tools = t))
+    detectTools()
     const clock = setInterval(() => (now = Date.now()), 15_000)
     return () => {
       clearInterval(clock)
@@ -123,7 +137,34 @@
 
   async function saveSettings(next: Settings) {
     settings = await api.saveSettings(next)
+    await detectTools()
+  }
+
+  async function detectTools() {
     tools = await api.detectTools()
+  }
+
+  async function installStreamlink() {
+    install = { running: true, progress: null, error: null }
+    const stop = await onInstallProgress((progress) => (install.progress = progress))
+    try {
+      await api.installStreamlink()
+      await detectTools()
+      toast('Streamlink is installed. Click a stream to watch it.')
+    } catch (e) {
+      install.error = String(e)
+    } finally {
+      install.running = false
+      stop()
+    }
+  }
+
+  async function openPlayerDownload(choice: Player) {
+    try {
+      await api.openPlayerDownload(choice)
+    } catch (e) {
+      toast(String(e), 'error')
+    }
   }
 
   function onWindowKey(event: KeyboardEvent) {
@@ -135,7 +176,7 @@
   }
 </script>
 
-<svelte:window onkeydown={onWindowKey} />
+<svelte:window onkeydown={onWindowKey} onfocus={detectTools} />
 
 {#snippet tile(streamer: Streamer)}
   <StreamerTile
@@ -153,6 +194,8 @@
 {/snippet}
 
 <header class="strip">
+  <h1 class="brand"><Logo size={28} /><span class="visually-hidden">NoPixel Live</span></h1>
+
   <p class="count" aria-live="polite">
     {#if loading}
       Checking Twitch and Kick…
@@ -193,6 +236,27 @@
     </button>
   </div>
 </header>
+
+{#if needsStreamlink || needsPlayer}
+  <div class="setup">
+    {#if needsStreamlink}
+      <div class="setup-row">
+        <p><strong>Streamlink is needed to play streams.</strong> NoPixel Live can install it for you.</p>
+        <StreamlinkInstall {install} oninstall={installStreamlink} />
+      </div>
+    {/if}
+    {#if needsPlayer}
+      <div class="setup-row">
+        <p>
+          <strong>{PLAYER_LABEL[player]} is not installed.</strong> Install it, or choose another player in Settings.
+        </p>
+        <button class="secondary" onclick={() => openPlayerDownload(player)}>
+          Get {PLAYER_LABEL[player]} <Icon name="external" size={15} />
+        </button>
+      </div>
+    {/if}
+  </div>
+{/if}
 
 {#if snapshot.errors.length}
   <div class="errors" role="alert">
@@ -267,7 +331,14 @@
 </div>
 
 {#if settingsOpen && settings}
-  <SettingsPanel {settings} {tools} onsave={saveSettings} onclose={() => (settingsOpen = false)} />
+  <SettingsPanel
+    {settings}
+    {tools}
+    {install}
+    oninstall={installStreamlink}
+    onsave={saveSettings}
+    onclose={() => (settingsOpen = false)}
+  />
 {/if}
 
 <style>
@@ -282,6 +353,11 @@
     padding: 14px 24px;
     background: var(--bg);
     border-bottom: 1px solid var(--line);
+  }
+
+  .brand {
+    display: flex;
+    color: var(--text);
   }
 
   .count {
@@ -418,6 +494,25 @@
     gap: 8px;
   }
 
+  .setup {
+    display: grid;
+    gap: 14px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--line);
+    font-size: 15px;
+  }
+
+  .setup-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 20px;
+  }
+
+  .setup-row p {
+    flex: 1 1 320px;
+  }
+
   main {
     padding: 20px 24px 48px;
   }
@@ -469,6 +564,9 @@
   }
 
   .secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     height: 36px;
     padding: 0 14px;
     border: 1px solid var(--line);
@@ -538,6 +636,7 @@
 
   @media (max-width: 640px) {
     .strip,
+    .setup,
     main {
       padding-left: 16px;
       padding-right: 16px;

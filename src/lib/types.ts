@@ -1,4 +1,6 @@
 export type Platform = 'twitch' | 'kick'
+export type Player = 'vlc' | 'mpv'
+export type ChatMode = 'window' | 'browser' | 'off'
 
 export interface Channel {
   platform: Platform
@@ -50,7 +52,9 @@ export interface Link {
 
 export interface Settings {
   streamlinkPath: string
+  player: Player
   playerPath: string
+  chat: ChatMode
   quality: string
   extraArgs: string
   preferredPlatform: Platform
@@ -68,7 +72,14 @@ export interface Settings {
 
 export interface Tools {
   streamlink: string | null
-  player: string | null
+  vlc: string | null
+  mpv: string | null
+}
+
+export interface InstallProgress {
+  stage: 'download' | 'unpack'
+  received: number
+  total: number
 }
 
 export interface PlayerError {

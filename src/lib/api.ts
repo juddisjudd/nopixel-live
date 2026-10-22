@@ -1,6 +1,6 @@
 import { invoke } from '@tauri-apps/api/core'
 import { listen } from '@tauri-apps/api/event'
-import type { Platform, PlayerError, Settings, Snapshot, Tools } from './types'
+import type { InstallProgress, Platform, Player, PlayerError, Settings, Snapshot, Tools } from './types'
 
 export const api = {
   snapshot: () => invoke<Snapshot>('get_snapshot'),
@@ -12,7 +12,9 @@ export const api = {
   refresh: () => invoke<void>('refresh_now'),
   play: (key: string, platform: Platform) => invoke<void>('play', { key, platform }),
   openPage: (key: string, platform: Platform) => invoke<void>('open_page', { key, platform }),
+  openPlayerDownload: (player: Player) => invoke<void>('open_player_download', { player }),
   detectTools: () => invoke<Tools>('detect_tools'),
+  installStreamlink: () => invoke<string>('install_streamlink'),
 }
 
 export const onSnapshot = (handler: (snapshot: Snapshot) => void) =>
@@ -20,3 +22,6 @@ export const onSnapshot = (handler: (snapshot: Snapshot) => void) =>
 
 export const onPlayerError = (handler: (error: PlayerError) => void) =>
   listen<PlayerError>('player-error', (event) => handler(event.payload))
+
+export const onInstallProgress = (handler: (progress: InstallProgress) => void) =>
+  listen<InstallProgress>('streamlink-install', (event) => handler(event.payload))

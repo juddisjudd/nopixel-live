@@ -1,4 +1,6 @@
+mod chat;
 mod commands;
+mod install;
 mod kick;
 mod merge;
 mod model;
@@ -30,13 +32,15 @@ pub fn run() {
                 )?;
             }
             let settings_path = app.path().app_config_dir()?.join("settings.json");
-            app.manage(AppState::new(settings_path)?);
+            let streamlink_dir = app.path().app_local_data_dir()?.join("streamlink");
+            app.manage(AppState::new(settings_path, streamlink_dir)?);
             tray::create(app.handle())?;
             tauri::async_runtime::spawn(poller::run(app.handle().clone()));
             Ok(())
         })
         .on_window_event(|window, event| {
             if let WindowEvent::CloseRequested { api, .. } = event
+                && window.label() == "main"
                 && window.state::<AppState>().settings().close_to_tray
             {
                 api.prevent_close();
@@ -53,7 +57,9 @@ pub fn run() {
             commands::refresh_now,
             commands::play,
             commands::open_page,
+            commands::open_player_download,
             commands::detect_tools,
+            commands::install_streamlink,
         ])
         .run(tauri::generate_context!())
         .expect("error while running NoPixel Live");

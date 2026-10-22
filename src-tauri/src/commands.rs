@@ -1,17 +1,20 @@
+use std::sync::atomic::Ordering;
+
 use serde::Serialize;
 use tauri::{AppHandle, Emitter, State};
-use tauri_plugin_opener::OpenerExt;
 
 use crate::model::{Channel, Platform, Snapshot};
-use crate::player;
 use crate::poller::AppState;
-use crate::settings::{Favorite, Hidden, Settings};
+use crate::settings::{Favorite, Hidden, Player, Settings};
+use crate::{chat, install, player};
 
+/// Locations found without the paths typed in Settings.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Tools {
     streamlink: Option<String>,
-    player: Option<String>,
+    vlc: Option<String>,
+    mpv: Option<String>,
 }
 
 #[tauri::command]
@@ -84,15 +87,19 @@ pub fn refresh_now(state: State<'_, AppState>) {
     state.refresh.notify_one();
 }
 
+// Async because building a window from a sync command deadlocks on Windows.
 #[tauri::command]
-pub fn play(
+pub async fn play(
     app: AppHandle,
     state: State<'_, AppState>,
     key: String,
     platform: Platform,
 ) -> Result<(), String> {
     let channel = live_channel(&state, &key, platform)?;
-    player::launch(app, &state.settings(), &channel)
+    let settings = state.settings();
+    player::launch(app.clone(), &settings, &state.streamlink_dir, &channel)?;
+    chat::open(&app, settings.chat, &channel)
+        .map_err(|e| format!("The stream is starting, but chat did not open. {e}"))
 }
 
 #[tauri::command]
@@ -103,19 +110,40 @@ pub fn open_page(
     platform: Platform,
 ) -> Result<(), String> {
     let channel = live_channel(&state, &key, platform)?;
-    app.opener()
-        .open_url(platform.channel_url(&channel.login), None::<&str>)
-        .map_err(|e| format!("Cannot open the browser: {e}"))
+    chat::open_in_browser(&app, &platform.channel_url(&channel.login))
+}
+
+#[tauri::command]
+pub fn open_player_download(app: AppHandle, player: Player) -> Result<(), String> {
+    chat::open_in_browser(&app, player.download_url())
 }
 
 #[tauri::command]
 pub fn detect_tools(state: State<'_, AppState>) -> Tools {
-    let settings = state.settings();
+    let found = |path: Option<std::path::PathBuf>| path.map(|p| p.display().to_string());
     Tools {
-        streamlink: player::find_streamlink(&settings.streamlink_path)
-            .map(|p| p.display().to_string()),
-        player: player::find_player(&settings.player_path).map(|p| p.display().to_string()),
+        streamlink: found(player::detect_streamlink(&state.streamlink_dir)),
+        vlc: found(player::detect_player(Player::Vlc)),
+        mpv: found(player::detect_player(Player::Mpv)),
     }
+}
+
+#[tauri::command]
+pub async fn install_streamlink(
+    app: AppHandle,
+    state: State<'_, AppState>,
+) -> Result<String, String> {
+    if state.installing.swap(true, Ordering::SeqCst) {
+        return Err("Streamlink is already being installed.".into());
+    }
+    let result = install::install(&state.client, &state.streamlink_dir, |progress| {
+        if let Err(e) = app.emit("streamlink-install", progress) {
+            log::warn!("cannot send install progress to the window: {e}");
+        }
+    })
+    .await;
+    state.installing.store(false, Ordering::SeqCst);
+    result.map(|path| path.display().to_string())
 }
 
 fn persist(state: &AppState, settings: Settings) -> Result<Settings, String> {

@@ -1,6 +1,8 @@
-import type { Channel, Platform, Streamer } from './types'
+import type { Channel, Platform, Player, Streamer } from './types'
 
 export const PLATFORM_LABEL: Record<Platform, string> = { twitch: 'Twitch', kick: 'Kick' }
+
+export const PLAYER_LABEL: Record<Player, string> = { vlc: 'VLC', mpv: 'mpv' }
 
 export type SiteFilter = 'all' | 'twitch' | 'kick' | 'both'
 

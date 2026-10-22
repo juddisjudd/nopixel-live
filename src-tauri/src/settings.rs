@@ -13,7 +13,9 @@ const MAX_POLL_SECONDS: u64 = 600;
 #[serde(rename_all = "camelCase", default)]
 pub struct Settings {
     pub streamlink_path: String,
+    pub player: Player,
     pub player_path: String,
+    pub chat: Chat,
     pub quality: String,
     pub extra_args: String,
     pub preferred_platform: Platform,
@@ -33,7 +35,9 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             streamlink_path: String::new(),
+            player: Player::Vlc,
             player_path: String::new(),
+            chat: Chat::Window,
             quality: "best".into(),
             extra_args: String::new(),
             preferred_platform: Platform::Twitch,
@@ -49,6 +53,37 @@ impl Default for Settings {
             hidden: Vec::new(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Player {
+    Vlc,
+    Mpv,
+}
+
+impl Player {
+    pub fn label(self) -> &'static str {
+        match self {
+            Player::Vlc => "VLC",
+            Player::Mpv => "mpv",
+        }
+    }
+
+    pub fn download_url(self) -> &'static str {
+        match self {
+            Player::Vlc => "https://www.videolan.org/vlc/",
+            Player::Mpv => "https://mpv.io/installation/",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum Chat {
+    Window,
+    Browser,
+    Off,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -201,6 +236,8 @@ mod tests {
     fn missing_fields_use_defaults() {
         let settings: Settings = serde_json::from_str(r#"{ "quality": "720p60" }"#).unwrap();
         assert_eq!(settings.quality, "720p60");
+        assert_eq!(settings.player, Player::Vlc);
+        assert_eq!(settings.chat, Chat::Window);
         assert_eq!(settings.kick_event, "nopixel-v");
         assert_eq!(settings.category, "Grand Theft Auto V");
         assert_eq!(settings.twitch_tags, ["NoPixelV", "NoPixel"]);
