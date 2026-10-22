@@ -1,0 +1,101 @@
+{
+  "data": {
+    "t0_0": {
+      "edges": [
+        {
+          "node": {
+            "title": "Nopixel V DM (Mymick-Eko) - Park Ranger Heist - Remastered",
+            "viewersCount": 1755,
+            "createdAt": "2026-10-16T22:02:37Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_uhn-440x248.jpg",
+            "game": {
+              "displayName": "Grand Theft Auto V"
+            },
+            "broadcaster": {
+              "login": "uhn",
+              "displayName": "UHN",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/7779488e-83de-4e83-a0a2-ea21231655ac-profile_image-70x70.jpg"
+            }
+          }
+        },
+        {
+          "node": {
+            "title": "♡ chatting -> halloween with the girls ! -> rp later? 𑣲⋆ !socials !discord",
+            "viewersCount": 1427,
+            "createdAt": "2026-10-17T04:44:13Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_novasobored-440x248.jpg",
+            "game": {
+              "displayName": "Grand Theft Auto V"
+            },
+            "broadcaster": {
+              "login": "novasobored",
+              "displayName": "novasobored",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/91c42005-9f75-4e95-b6c1-8f13a7a8f0ef-profile_image-70x70.png"
+            }
+          }
+        }
+      ]
+    },
+    "t0_1": {
+      "edges": [
+        {
+          "node": {
+            "title": "[PT/BR] 3K CHEGA NUNCA ?| 🟢 AO VIVO | [Midnight] Mason Ferreira |  💯  ❗DC ❗INSTA ❗PIX ❗TIKTOK ❗SALVE @ferreiralive_",
+            "viewersCount": 1,
+            "createdAt": "2026-10-16T21:41:29Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_ferreiralive_-440x248.jpg",
+            "game": {
+              "displayName": "Grand Theft Auto V"
+            },
+            "broadcaster": {
+              "login": "ferreiralive_",
+              "displayName": "ferreiralive_",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/0990b8d3-4ac5-48f4-b31a-a00539c3d1f5-profile_image-70x70.png"
+            }
+          }
+        },
+        {
+          "node": {
+            "title": "[DROPS] VAMOS PA SQUADRA Y DESPUES RIVALS",
+            "viewersCount": 1,
+            "createdAt": "2026-10-17T00:12:57Z",
+            "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_elneglo311-440x248.jpg",
+            "game": {
+              "displayName": "DRAGON BALL GEKISHIN SQUADRA"
+            },
+            "broadcaster": {
+              "login": "elneglo311",
+              "displayName": "elneglo311",
+              "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/507777f4-1326-4e9b-82a7-7a0249d355c8-profile_image-70x70.png"
+            }
+          }
+        }
+      ]
+    },
+    "u0": [
+      {
+        "stream": {
+          "title": "Lang Buddha | NoPixel V | Watch NoPixel News Ep. 5 https://youtu.be/NT3nsCBwM14 !news",
+          "viewersCount": 14120,
+          "createdAt": "2026-10-16T18:01:14Z",
+          "previewImageURL": "https://static-cdn.jtvnw.net/previews-ttv/live_user_buddha-440x248.jpg",
+          "game": {
+            "displayName": "Grand Theft Auto V"
+          },
+          "broadcaster": {
+            "login": "buddha",
+            "displayName": "buddha",
+            "profileImageURL": "https://static-cdn.jtvnw.net/jtv_user_pictures/6eed7dbd-71e2-4cf9-afd5-bd48e8e2e3f5-profile_image-70x70.png"
+          }
+        }
+      },
+      {
+        "stream": null
+      }
+    ]
+  },
+  "extensions": {
+    "durationMilliseconds": 56,
+    "requestID": "01M543V7AXY449CFY0E2MC434C"
+  }
+}

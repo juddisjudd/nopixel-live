@@ -1,0 +1,79 @@
+{
+  "data": {
+    "streams": [
+      {
+        "channel": {
+          "id": 668,
+          "slug": "xqc",
+          "verified": true
+        },
+        "livestream": {
+          "id": "01a146d3-2c58-7c5a-9d40-e3cdbd206bf1",
+          "is_mature": true,
+          "language": "en",
+          "show_view_count": true,
+          "thumbnail": {
+            "src": "https://images.kick.com/video_thumbnails/DsuAwCgUc9Bh/DitTQj2kW0e6/720.webp",
+            "srcset": ""
+          },
+          "title": "🐗LIVE🐗ALERT🐗CLICK🐗SHORT INTRO🐗MEGA DAY🐗GTA V🐗NOPIXEL V🐗LOCKED IN🐗PULL UP🐗ROAD TO 10M🐗STARTS NOW🐗",
+          "view_count": 9608
+        },
+        "user": {
+          "id": 676,
+          "profile_picture_url": "https://files.kick.com/images/user/676/profile_image/conversion/931b4e8f-5445-427c-bd82-b473530390cc-medium.webp",
+          "username": "xQc"
+        }
+      },
+      {
+        "channel": {
+          "id": 32807,
+          "slug": "buddha",
+          "verified": true
+        },
+        "livestream": {
+          "id": "01a145e0-2968-77a2-a7e2-5a3c381caf9f",
+          "is_mature": false,
+          "language": "en",
+          "show_view_count": true,
+          "thumbnail": {
+            "src": "https://images.kick.com/video_thumbnails/BO2zfdDBEu6T/eFM4iN7Gb3p0/720.webp",
+            "srcset": ""
+          },
+          "title": "we backkk  | Watch NOPIXEL NEWS EP 5 | https://youtu.be/NT3nsCBwM14",
+          "view_count": 8633
+        },
+        "user": {
+          "id": 33057,
+          "profile_picture_url": "https://files.kick.com/images/user/33057/profile_image/conversion/f9532639-c917-468d-899a-da08c31a1d77-medium.webp",
+          "username": "Buddha"
+        }
+      },
+      {
+        "channel": {
+          "id": 984675,
+          "slug": "saab",
+          "verified": true
+        },
+        "livestream": {
+          "id": "01a14614-1660-71cf-9ada-31d6702f3346",
+          "is_mature": false,
+          "language": "en",
+          "show_view_count": true,
+          "thumbnail": {
+            "src": "https://images.kick.com/video_thumbnails/jPtx6u0HYHIY/MMR5y4aLNW38/720.webp",
+            "srcset": ""
+          },
+          "title": "Commissioner Dawson - THE HUNT FOR THE RABBIT - Nopixel V",
+          "view_count": 5170
+        },
+        "user": {
+          "id": 1028087,
+          "profile_picture_url": "https://files.kick.com/images/user/1028087/profile_image/conversion/64110a86-82e6-48f3-bb2c-df77d4c54572-medium.webp",
+          "username": "Saab"
+        }
+      }
+    ]
+  },
+  "message": "success"
+}

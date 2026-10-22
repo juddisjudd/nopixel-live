@@ -1,0 +1,86 @@
+@import '@fontsource-variable/overpass';
+
+:root {
+  --bg: #000000;
+  --raised: #161616;
+  --line: #2b2b2b;
+  --text: #f2efe9;
+  --muted: #8f8b85;
+  --twitch: #a970ff;
+  --kick: #53fc18;
+
+  --radius: 4px;
+  --font: 'Overpass Variable', system-ui, sans-serif;
+
+  color-scheme: dark;
+  scrollbar-color: var(--line) var(--bg);
+  font-family: var(--font);
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+h1,
+h2,
+h3,
+p {
+  margin: 0;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.twitch {
+  color: var(--twitch);
+}
+
+.kick {
+  color: var(--kick);
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
