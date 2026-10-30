@@ -4,6 +4,8 @@ See every live NoPixel streamer on Twitch and Kick in one window. Click a stream
 
 **[Download for Windows](../../releases/latest)**
 
+![NoPixel Live showing 64 live streams in a grid, each with a preview, the streamer's name, stream title, and Twitch and Kick buttons with viewer counts](docs/screenshots/streams.webp)
+
 - One list of everyone playing NoPixel right now, on both sites.
 - A streamer who is live on Twitch and Kick at the same time shows once, with a button for each site.
 - Star your favorites. They stay at the top, and Windows tells you when they go live.
@@ -19,6 +21,8 @@ You need Windows 10 or 11. Setup takes about 5 minutes.
 2. Open the [NoPixel Live download page](../../releases/latest). Under **Assets**, click the file that ends in `setup.exe`.
 3. Run the file you downloaded.
 4. Open NoPixel Live. A short setup starts the first time. It checks that Streamlink and your player work, and asks how you want chat to open. If Streamlink is missing, click **Install Streamlink**. Streamlink is the free tool that gets the video from Twitch and Kick. The install takes about a minute and does not ask for admin rights.
+
+![The last setup step, with check marks for Streamlink, the mpv player, and chat](docs/screenshots/setup.webp)
 
 Windows may say "Windows protected your PC". It says this because the app is not signed with a paid certificate. Click **More info**, then **Run anyway**.
 
@@ -45,6 +49,8 @@ To quit when you close the window instead, open Settings and turn off **Keep run
 Click the sliders icon at the top right. Settings has four tabs: **Playback**, **Finding streams**, **Streamers**, and **App**. Click **Save** when you are done.
 
 To go through the first setup again, open the **App** tab and click **Run setup again**.
+
+![The Settings window on the Playback tab, with player, Streamlink, chat, and quality options](docs/screenshots/settings.webp)
 
 | Setting | What it does |
 | --- | --- |
