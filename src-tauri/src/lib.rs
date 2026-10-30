@@ -59,6 +59,8 @@ pub fn run() {
             commands::open_page,
             commands::open_player_download,
             commands::detect_tools,
+            commands::check_streamlink,
+            commands::check_player,
             commands::install_streamlink,
         ])
         .run(tauri::generate_context!())

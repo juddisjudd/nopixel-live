@@ -3,6 +3,7 @@
   import Icon from './lib/Icon.svelte'
   import Logo from './lib/Logo.svelte'
   import SettingsPanel from './lib/SettingsPanel.svelte'
+  import SetupWizard from './lib/SetupWizard.svelte'
   import StreamerTile from './lib/StreamerTile.svelte'
   import StreamlinkInstall, { type InstallState } from './lib/StreamlinkInstall.svelte'
   import { api, onInstallProgress, onPlayerError, onSnapshot } from './lib/api'
@@ -37,6 +38,7 @@
   let query = $state('')
   let site = $state<SiteFilter>('all')
   let settingsOpen = $state(false)
+  let setupOpen = $state(false)
   let refreshing = $state(false)
   let now = $state(Date.now())
   let toasts = $state<Toast[]>([])
@@ -69,7 +71,10 @@
       onPlayerError((e) => toast(`${e.name} on ${PLATFORM_LABEL[e.platform]} did not play. ${e.message}`, 'error')),
     ]
     api.snapshot().then(applySnapshot)
-    api.settings().then((s) => (settings = s))
+    api.settings().then((s) => {
+      settings = s
+      setupOpen = !s.setupDone
+    })
     detectTools()
     const clock = setInterval(() => (now = Date.now()), 15_000)
     return () => {
@@ -144,18 +149,35 @@
     tools = await api.detectTools()
   }
 
-  async function installStreamlink() {
+  async function installStreamlink(): Promise<string | null> {
     install = { running: true, progress: null, error: null }
     const stop = await onInstallProgress((progress) => (install.progress = progress))
     try {
-      await api.installStreamlink()
+      const path = await api.installStreamlink()
       await detectTools()
       toast('Streamlink is installed. Click a stream to watch it.')
+      return path
     } catch (e) {
       install.error = String(e)
+      return null
     } finally {
       install.running = false
       stop()
+    }
+  }
+
+  async function finishSetup(next: Settings) {
+    settings = await api.saveSettings(next)
+    await detectTools()
+  }
+
+  async function closeSetup() {
+    setupOpen = false
+    if (!settings || settings.setupDone) return
+    try {
+      settings = await api.saveSettings({ ...settings, setupDone: true })
+    } catch (e) {
+      toast(String(e), 'error')
     }
   }
 
@@ -169,7 +191,7 @@
 
   function onWindowKey(event: KeyboardEvent) {
     const typing = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement
-    if (event.key === '/' && !typing && !settingsOpen) {
+    if (event.key === '/' && !typing && !settingsOpen && !setupOpen) {
       event.preventDefault()
       search?.focus()
     }
@@ -237,77 +259,79 @@
   </div>
 </header>
 
-{#if needsStreamlink || needsPlayer}
-  <div class="setup">
-    {#if needsStreamlink}
-      <div class="setup-row">
-        <p><strong>Streamlink is needed to play streams.</strong> NoPixel Live can install it for you.</p>
-        <StreamlinkInstall {install} oninstall={installStreamlink} />
-      </div>
-    {/if}
-    {#if needsPlayer}
-      <div class="setup-row">
-        <p>
-          <strong>{PLAYER_LABEL[player]} is not installed.</strong> Install it, or choose another player in Settings.
-        </p>
-        <button class="secondary" onclick={() => openPlayerDownload(player)}>
-          Get {PLAYER_LABEL[player]} <Icon name="external" size={15} />
-        </button>
-      </div>
-    {/if}
-  </div>
-{/if}
-
-{#if snapshot.errors.length}
-  <div class="errors" role="alert">
-    {#each snapshot.errors as error (error)}
-      <p><Icon name="alert" size={16} /> {error}</p>
-    {/each}
-  </div>
-{/if}
-
-<main>
-  {#if loading}
-    <div class="grid" aria-hidden="true">
-      {#each { length: 8 }, i (i)}
-        <div class="placeholder"><span></span><span></span><span></span></div>
-      {/each}
-    </div>
-  {:else if visible.length === 0}
-    <div class="empty">
-      {#if query.trim()}
-        <p>No one live matches “{query.trim()}”.</p>
-        <button class="secondary" onclick={() => (query = '')}>Clear search</button>
-      {:else if site !== 'all'}
-        <p>No one is live on {site === 'both' ? 'both sites' : PLATFORM_LABEL[site]} right now.</p>
-        <button class="secondary" onclick={() => (site = 'all')}>Show all sites</button>
-      {:else}
-        <p>No NoPixel streams are live right now.</p>
+<div class="scroll">
+  {#if needsStreamlink || needsPlayer}
+    <div class="setup">
+      {#if needsStreamlink}
+        <div class="setup-row">
+          <p><strong>Streamlink is needed to play streams.</strong> NoPixel Live can install it for you.</p>
+          <StreamlinkInstall {install} oninstall={installStreamlink} />
+        </div>
+      {/if}
+      {#if needsPlayer}
+        <div class="setup-row">
+          <p>
+            <strong>{PLAYER_LABEL[player]} is not installed.</strong> Install it, or choose another player in Settings.
+          </p>
+          <button class="secondary" onclick={() => openPlayerDownload(player)}>
+            Get {PLAYER_LABEL[player]} <Icon name="external" size={15} />
+          </button>
+        </div>
       {/if}
     </div>
-  {:else}
-    {#if favorites.length}
-      <section aria-labelledby="favorites-heading">
-        <h2 id="favorites-heading">Favorites</h2>
-        <div class="grid">
-          {#each favorites as streamer (streamer.key)}
-            {@render tile(streamer)}
-          {/each}
-        </div>
-      </section>
-    {/if}
-    {#if others.length}
-      <section aria-labelledby="live-heading">
-        <h2 id="live-heading" class={[!favorites.length && 'visually-hidden']}>Everyone else</h2>
-        <div class="grid">
-          {#each others as streamer (streamer.key)}
-            {@render tile(streamer)}
-          {/each}
-        </div>
-      </section>
-    {/if}
   {/if}
-</main>
+
+  {#if snapshot.errors.length}
+    <div class="errors" role="alert">
+      {#each snapshot.errors as error (error)}
+        <p><Icon name="alert" size={16} /> {error}</p>
+      {/each}
+    </div>
+  {/if}
+
+  <main>
+    {#if loading}
+      <div class="grid" aria-hidden="true">
+        {#each { length: 8 }, i (i)}
+          <div class="placeholder"><span></span><span></span><span></span></div>
+        {/each}
+      </div>
+    {:else if visible.length === 0}
+      <div class="empty">
+        {#if query.trim()}
+          <p>No one live matches “{query.trim()}”.</p>
+          <button class="secondary" onclick={() => (query = '')}>Clear search</button>
+        {:else if site !== 'all'}
+          <p>No one is live on {site === 'both' ? 'both sites' : PLATFORM_LABEL[site]} right now.</p>
+          <button class="secondary" onclick={() => (site = 'all')}>Show all sites</button>
+        {:else}
+          <p>No NoPixel streams are live right now.</p>
+        {/if}
+      </div>
+    {:else}
+      {#if favorites.length}
+        <section aria-labelledby="favorites-heading">
+          <h2 id="favorites-heading">Favorites</h2>
+          <div class="grid">
+            {#each favorites as streamer (streamer.key)}
+              {@render tile(streamer)}
+            {/each}
+          </div>
+        </section>
+      {/if}
+      {#if others.length}
+        <section aria-labelledby="live-heading">
+          <h2 id="live-heading" class={[!favorites.length && 'visually-hidden']}>Everyone else</h2>
+          <div class="grid">
+            {#each others as streamer (streamer.key)}
+              {@render tile(streamer)}
+            {/each}
+          </div>
+        </section>
+      {/if}
+    {/if}
+  </main>
+</div>
 
 <div class="toasts">
   {#each toasts as item (item.id)}
@@ -337,15 +361,29 @@
     {install}
     oninstall={installStreamlink}
     onsave={saveSettings}
+    onsetup={() => {
+      settingsOpen = false
+      setupOpen = true
+    }}
     onclose={() => (settingsOpen = false)}
+  />
+{/if}
+
+{#if setupOpen && settings && tools}
+  <SetupWizard
+    {settings}
+    {tools}
+    {install}
+    oninstall={installStreamlink}
+    ondetect={detectTools}
+    onfinish={finishSetup}
+    onclose={closeSetup}
   />
 {/if}
 
 <style>
   .strip {
-    position: sticky;
-    top: 0;
-    z-index: 2;
+    flex: none;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -511,6 +549,13 @@
 
   .setup-row p {
     flex: 1 1 320px;
+  }
+
+  .scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    scrollbar-width: none;
   }
 
   main {

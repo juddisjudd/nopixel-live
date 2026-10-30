@@ -64,6 +64,7 @@ export interface Settings {
   category: string
   notifyFavorites: boolean
   closeToTray: boolean
+  setupDone: boolean
   favorites: Favorite[]
   links: Link[]
   added: AddedChannel[]

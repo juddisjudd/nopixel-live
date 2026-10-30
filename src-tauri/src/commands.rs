@@ -128,6 +128,26 @@ pub fn detect_tools(state: State<'_, AppState>) -> Tools {
     }
 }
 
+/// `None` when no Streamlink is found; an error when one is found but does not run.
+#[tauri::command]
+pub async fn check_streamlink(
+    state: State<'_, AppState>,
+    path: String,
+) -> Result<Option<String>, String> {
+    let Some(streamlink) = player::find_streamlink(path.trim(), &state.streamlink_dir) else {
+        return Ok(None);
+    };
+    tauri::async_runtime::spawn_blocking(move || player::streamlink_version(&streamlink))
+        .await
+        .map_err(|e| format!("Checking Streamlink stopped: {e}"))?
+        .map(Some)
+}
+
+#[tauri::command]
+pub fn check_player(player: Player, path: String) -> Option<String> {
+    player::find_player(player, path.trim()).map(|p| p.display().to_string())
+}
+
 #[tauri::command]
 pub async fn install_streamlink(
     app: AppHandle,

@@ -25,6 +25,9 @@ pub struct Settings {
     pub category: String,
     pub notify_favorites: bool,
     pub close_to_tray: bool,
+    // A settings file saved before setup existed belongs to someone who already set the app up.
+    #[serde(default = "already_set_up")]
+    pub setup_done: bool,
     pub favorites: Vec<Favorite>,
     pub links: Vec<Link>,
     pub added: Vec<AddedChannel>,
@@ -47,12 +50,17 @@ impl Default for Settings {
             category: "Grand Theft Auto V".into(),
             notify_favorites: true,
             close_to_tray: true,
+            setup_done: false,
             favorites: Vec::new(),
             links: Vec::new(),
             added: Vec::new(),
             hidden: Vec::new(),
         }
     }
+}
+
+fn already_set_up() -> bool {
+    true
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
@@ -241,6 +249,14 @@ mod tests {
         assert_eq!(settings.kick_event, "nopixel-v");
         assert_eq!(settings.category, "Grand Theft Auto V");
         assert_eq!(settings.twitch_tags, ["NoPixelV", "NoPixel"]);
+        assert!(settings.setup_done);
+    }
+
+    #[test]
+    fn fresh_install_needs_setup() {
+        let path =
+            std::env::temp_dir().join(format!("nopixel-live-none-{}.json", std::process::id()));
+        assert!(!Settings::load(&path).setup_done);
     }
 
     #[test]

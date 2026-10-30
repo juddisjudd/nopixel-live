@@ -71,6 +71,27 @@ pub fn launch(
     Ok(())
 }
 
+pub fn streamlink_version(streamlink: &Path) -> Result<String, String> {
+    let mut command = Command::new(streamlink);
+    command.arg("--version");
+    hide_console_window(&mut command);
+    let output = command
+        .output()
+        .map_err(|e| format!("Cannot start Streamlink at {}: {e}", streamlink.display()))?;
+    if !output.status.success() {
+        return Err(last_error_line(&output.stdout, &output.stderr));
+    }
+    Ok(version_from(&String::from_utf8_lossy(&output.stdout)))
+}
+
+fn version_from(stdout: &str) -> String {
+    let line = stdout.lines().next().unwrap_or_default().trim();
+    line.strip_prefix("streamlink")
+        .unwrap_or(line)
+        .trim()
+        .to_string()
+}
+
 fn not_found(tool: &str, configured: &str, hint: &str) -> String {
     if configured.is_empty() {
         format!("{tool} is not installed. {hint}")
@@ -290,6 +311,13 @@ mod tests {
             last_error_line(b"", b""),
             "Streamlink exited with an error."
         );
+    }
+
+    #[test]
+    fn version_drops_the_program_name() {
+        assert_eq!(version_from("streamlink 7.5.0\n"), "7.5.0");
+        assert_eq!(version_from("7.5.0"), "7.5.0");
+        assert_eq!(version_from(""), "");
     }
 
     #[test]

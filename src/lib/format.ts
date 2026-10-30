@@ -1,8 +1,24 @@
-import type { Channel, Platform, Player, Streamer } from './types'
+import type { Channel, ChatMode, Platform, Player, Streamer } from './types'
 
 export const PLATFORM_LABEL: Record<Platform, string> = { twitch: 'Twitch', kick: 'Kick' }
 
 export const PLAYER_LABEL: Record<Player, string> = { vlc: 'VLC', mpv: 'mpv' }
+
+export const PLATFORM_OPTIONS: { value: Platform; label: string; tone: string }[] = [
+  { value: 'twitch', label: PLATFORM_LABEL.twitch, tone: 'twitch' },
+  { value: 'kick', label: PLATFORM_LABEL.kick, tone: 'kick' },
+]
+
+export const PLAYER_OPTIONS: { value: Player; label: string }[] = [
+  { value: 'vlc', label: PLAYER_LABEL.vlc },
+  { value: 'mpv', label: PLAYER_LABEL.mpv },
+]
+
+export const CHAT_MODES: { value: ChatMode; label: string }[] = [
+  { value: 'window', label: 'In a window' },
+  { value: 'browser', label: 'In my browser' },
+  { value: 'off', label: 'Off' },
+]
 
 export type SiteFilter = 'all' | 'twitch' | 'kick' | 'both'
 

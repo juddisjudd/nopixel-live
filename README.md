@@ -18,7 +18,7 @@ You need Windows 10 or 11. Setup takes about 5 minutes.
 1. Install **VLC**. It plays the video. Get it from [videolan.org](https://www.videolan.org/vlc/). If you prefer mpv, you can pick it in Settings later.
 2. Open the [NoPixel Live download page](../../releases/latest). Under **Assets**, click the file that ends in `setup.exe`.
 3. Run the file you downloaded.
-4. Open NoPixel Live. If it says Streamlink is needed, click **Install Streamlink**. Streamlink is the free tool that gets the video from Twitch and Kick. The install takes about a minute and does not ask for admin rights.
+4. Open NoPixel Live. A short setup starts the first time. It checks that Streamlink and your player work, and asks how you want chat to open. If Streamlink is missing, click **Install Streamlink**. Streamlink is the free tool that gets the video from Twitch and Kick. The install takes about a minute and does not ask for admin rights.
 
 Windows may say "Windows protected your PC". It says this because the app is not signed with a paid certificate. Click **More info**, then **Run anyway**.
 
@@ -42,7 +42,9 @@ To quit when you close the window instead, open Settings and turn off **Keep run
 
 ## Settings
 
-Click the sliders icon at the top right. Click **Save** when you are done.
+Click the sliders icon at the top right. Settings has four tabs: **Playback**, **Finding streams**, **Streamers**, and **App**. Click **Save** when you are done.
+
+To go through the first setup again, open the **App** tab and click **Run setup again**.
 
 | Setting | What it does |
 | --- | --- |

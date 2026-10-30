@@ -68,4 +68,6 @@ Both sources are the endpoints that twitch.tv and kick.com use in the browser. T
 | `src-tauri/src/settings.rs` | Settings file, defaults, and input cleanup |
 | `src/App.svelte` | Main window |
 | `src/lib/StreamerTile.svelte` | One streamer |
-| `src/lib/SettingsPanel.svelte` | Settings dialog |
+| `src/lib/SettingsPanel.svelte` | Settings dialog with tabs |
+| `src/lib/SetupWizard.svelte` | First-run setup: Streamlink, player, chat |
+| `src/lib/Segmented.svelte` | Segmented radio buttons used by both dialogs |
