@@ -8,6 +8,8 @@ use crate::poller::AppState;
 use crate::settings::{Favorite, Hidden, Player, Settings};
 use crate::{chat, install, player};
 
+const SUPPORT_URL: &str = "https://ko-fi.com/ohitsjudd";
+
 /// Locations found without the paths typed in Settings.
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -116,6 +118,11 @@ pub fn open_page(
 #[tauri::command]
 pub fn open_player_download(app: AppHandle, player: Player) -> Result<(), String> {
     chat::open_in_browser(&app, player.download_url())
+}
+
+#[tauri::command]
+pub fn open_support_page(app: AppHandle) -> Result<(), String> {
+    chat::open_in_browser(&app, SUPPORT_URL)
 }
 
 #[tauri::command]

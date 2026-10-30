@@ -21,6 +21,7 @@ pub fn run() {
             tray::show_main_window(app);
         }))
         .plugin(tauri_plugin_window_state::Builder::new().build())
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
         .setup(|app| {
@@ -58,6 +59,7 @@ pub fn run() {
             commands::play,
             commands::open_page,
             commands::open_player_download,
+            commands::open_support_page,
             commands::detect_tools,
             commands::check_streamlink,
             commands::check_player,

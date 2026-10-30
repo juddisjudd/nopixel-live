@@ -46,6 +46,15 @@ The tag sets the installer version. The version in `package.json`, `Cargo.toml`,
 
 The installer is not code-signed, so Windows SmartScreen warns on the first run.
 
+### Updates
+
+Installed apps update themselves from `latest.json` on the newest GitHub release. The workflow writes that file on every tag build.
+
+- Tag builds sign the installer with the updater key. The private key is the `TAURI_SIGNING_PRIVATE_KEY` repository secret. It has no password.
+- A copy of the key is in `~/.tauri/nopixel-live.key`. Back it up. If the key is lost, installed apps cannot update, and every user must install the next version by hand.
+- The public key is `plugins.updater.pubkey` in `tauri.conf.json`. Change it only together with the secret.
+- Builds without a tag do not sign anything, so they need no key.
+
 ## How discovery works
 
 Both sources are the endpoints that twitch.tv and kick.com use in the browser. They are not official APIs, so they can change without notice. If one breaks, the app shows the error under the header and keeps showing the other site.
@@ -71,3 +80,4 @@ Both sources are the endpoints that twitch.tv and kick.com use in the browser. T
 | `src/lib/SettingsPanel.svelte` | Settings dialog with tabs |
 | `src/lib/SetupWizard.svelte` | First-run setup: Streamlink, player, chat |
 | `src/lib/Segmented.svelte` | Segmented radio buttons used by both dialogs |
+| `src/lib/updater.svelte.ts` | Update checks and install |

@@ -6,18 +6,20 @@
   import { api } from './api'
   import { CHAT_MODES, PLATFORM_LABEL, PLATFORM_OPTIONS, PLAYER_LABEL, PLAYER_OPTIONS } from './format'
   import type { AddedChannel, ChatMode, Favorite, Hidden, Link, Platform, Player, Settings, Tools } from './types'
+  import type { Updater } from './updater.svelte'
 
   interface Props {
     settings: Settings
     tools: Tools | null
     install: InstallState
+    updater: Updater
     oninstall: () => void
     onsave: (settings: Settings) => Promise<void>
     onsetup: () => void
     onclose: () => void
   }
 
-  let { settings, tools, install, oninstall, onsave, onsetup, onclose }: Props = $props()
+  let { settings, tools, install, updater, oninstall, onsave, onsetup, onclose }: Props = $props()
 
   type Tab = 'playback' | 'sources' | 'streamers' | 'app'
   const TABS: { id: Tab; label: string }[] = [
@@ -111,6 +113,26 @@
   let formElement = $state<HTMLFormElement>()
 
   let playerFound = $derived(tools?.[form.player] ?? null)
+  let readyUpdate = $derived(
+    updater.state.kind === 'available' || updater.state.kind === 'failed' ? updater.state.update : null,
+  )
+  let updateStatus = $derived.by(() => {
+    const state = updater.state
+    switch (state.kind) {
+      case 'checking':
+        return 'Checking…'
+      case 'current':
+        return 'You have the newest version.'
+      case 'available':
+        return `Version ${state.update.version} is ready.`
+      case 'downloading':
+        return 'Downloading the update…'
+      case 'failed':
+        return `${state.update ? 'The update did not install.' : 'Could not check for updates.'} ${state.message}`
+      default:
+        return ''
+    }
+  })
   let addedGroups = $derived(
     [...new Set(form.added.map((a) => a.login))].map((login) => ({
       login,
@@ -468,9 +490,39 @@
         </fieldset>
 
         <fieldset>
+          <legend>Updates</legend>
+          <p class="note">You have version {updater.version}. New versions are checked every 6 hours.</p>
+          <div class="row">
+            {#if readyUpdate}
+              <button type="button" class="primary" onclick={() => updater.install()}>
+                Update to {readyUpdate.version} and restart
+              </button>
+            {:else}
+              <button
+                type="button"
+                class="secondary"
+                onclick={() => updater.check()}
+                disabled={updater.state.kind === 'checking' || updater.state.kind === 'downloading'}
+              >
+                Check for updates
+              </button>
+            {/if}
+            <p class="note" role="status">{updateStatus}</p>
+          </div>
+        </fieldset>
+
+        <fieldset>
           <legend>Setup</legend>
           <p class="note">Goes through Streamlink, your player, and chat again. Save first if you changed anything here.</p>
           <button type="button" class="secondary" onclick={onsetup}>Run setup again</button>
+        </fieldset>
+
+        <fieldset>
+          <legend>Support</legend>
+          <p class="note">NoPixel Live is free. If you enjoy it, you can support it on Ko-fi.</p>
+          <button type="button" class="secondary" onclick={() => api.openSupportPage()}>
+            Support on Ko-fi <Icon name="external" size={15} />
+          </button>
         </fieldset>
       </div>
     </div>
@@ -708,6 +760,23 @@
   .link {
     display: flex;
     gap: 8px;
+  }
+
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 12px;
+  }
+
+  .row .note {
+    flex: 1 1 200px;
+    overflow-wrap: anywhere;
+  }
+
+  .secondary:disabled {
+    opacity: 0.6;
+    cursor: default;
   }
 
   .note {

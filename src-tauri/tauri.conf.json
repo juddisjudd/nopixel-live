@@ -27,6 +27,15 @@
       "devCsp": null
     }
   },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IENGQkFEOEVBOTY5MDgyODUKUldTRmdwQ1c2dGk2ejVYSzcwZzgwbmh3TXIrNm1EU3dZV2xsS2dzcU9jcVZqdFgwNjhYb09PTHcK",
+      "endpoints": ["https://github.com/juddisjudd/nopixel-live/releases/latest/download/latest.json"],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  },
   "bundle": {
     "active": true,
     "targets": ["nsis"],

@@ -14,9 +14,11 @@
     ago,
     matchesQuery,
     matchesSite,
+    megabytes,
     type SiteFilter,
   } from './lib/format'
   import type { Platform, Player, Settings, Snapshot, Streamer, Tools } from './lib/types'
+  import { Updater } from './lib/updater.svelte'
 
   interface Toast {
     id: number
@@ -44,6 +46,7 @@
   let toasts = $state<Toast[]>([])
   let search = $state<HTMLInputElement>()
   let install = $state<InstallState>({ running: false, progress: null, error: null })
+  const updater = new Updater()
   let nextToastId = 0
 
   let loading = $derived(snapshot.updatedAt === null)
@@ -51,6 +54,17 @@
   let player = $derived<Player>(settings?.player ?? 'vlc')
   let needsStreamlink = $derived(!!tools && !!settings && !settings.streamlinkPath && !tools.streamlink)
   let needsPlayer = $derived(!!tools && !!settings && !settings.playerPath && !tools[player])
+  let update = $derived.by(() => {
+    const state = updater.state
+    if (state.kind === 'available') return { version: state.update.version, progress: null, error: null }
+    if (state.kind === 'downloading') {
+      const { received, total } = state
+      const progress = total ? `Downloading ${megabytes(received)} of ${megabytes(total)} MB…` : 'Downloading…'
+      return { version: state.update.version, progress, error: null }
+    }
+    if (state.kind === 'failed' && state.update) return { version: state.update.version, progress: null, error: state.message }
+    return null
+  })
   let favoriteKeys = $derived(new Set(settings?.favorites.map((f) => f.key) ?? []))
   let searched = $derived(snapshot.streamers.filter((s) => matchesQuery(s, query)))
   let counts = $derived(
@@ -77,8 +91,10 @@
     })
     detectTools()
     const clock = setInterval(() => (now = Date.now()), 15_000)
+    const stopUpdates = updater.start()
     return () => {
       clearInterval(clock)
+      stopUpdates()
       for (const pending of unlisten) pending.then((stop) => stop())
     }
   })
@@ -260,8 +276,23 @@
 </header>
 
 <div class="scroll">
-  {#if needsStreamlink || needsPlayer}
+  {#if needsStreamlink || needsPlayer || update}
     <div class="setup">
+      {#if update}
+        <div class="setup-row">
+          <p>
+            <strong>NoPixel Live {update.version} is ready.</strong> The app closes and opens again while it updates.
+            {#if update.error}<span class="problem">{update.error}</span>{/if}
+          </p>
+          {#if update.progress}
+            <span class="progress" role="status">{update.progress}</span>
+          {:else}
+            <button class="secondary" onclick={() => updater.install()}>
+              {update.error ? 'Try again' : 'Update and restart'}
+            </button>
+          {/if}
+        </div>
+      {/if}
       {#if needsStreamlink}
         <div class="setup-row">
           <p><strong>Streamlink is needed to play streams.</strong> NoPixel Live can install it for you.</p>
@@ -359,6 +390,7 @@
     {settings}
     {tools}
     {install}
+    {updater}
     oninstall={installStreamlink}
     onsave={saveSettings}
     onsetup={() => {
@@ -549,6 +581,19 @@
 
   .setup-row p {
     flex: 1 1 320px;
+  }
+
+  .setup-row .problem {
+    display: block;
+    margin-top: 4px;
+    font-size: 14px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .progress {
+    font-size: 14px;
+    color: var(--muted);
   }
 
   .scroll {

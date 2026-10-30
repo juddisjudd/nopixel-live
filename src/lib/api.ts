@@ -13,6 +13,7 @@ export const api = {
   play: (key: string, platform: Platform) => invoke<void>('play', { key, platform }),
   openPage: (key: string, platform: Platform) => invoke<void>('open_page', { key, platform }),
   openPlayerDownload: (player: Player) => invoke<void>('open_player_download', { player }),
+  openSupportPage: () => invoke<void>('open_support_page'),
   detectTools: () => invoke<Tools>('detect_tools'),
   checkStreamlink: (path: string) => invoke<string | null>('check_streamlink', { path }),
   checkPlayer: (player: Player, path: string) => invoke<string | null>('check_player', { player, path }),

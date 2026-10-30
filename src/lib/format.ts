@@ -24,6 +24,8 @@ export type SiteFilter = 'all' | 'twitch' | 'kick' | 'both'
 
 const compactFormat = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
 
+export const megabytes = (bytes: number) => Math.round(bytes / 1_000_000)
+
 export function compact(n: number): string {
   return compactFormat.format(n)
 }

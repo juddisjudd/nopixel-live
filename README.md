@@ -86,7 +86,9 @@ The app reads the same data that the Twitch and Kick websites use, and those sit
 
 ## Update or remove
 
-To update, download the newest setup file from the [download page](../../releases/latest) and run it. Your settings stay.
+The app checks for a new version when it starts and every 6 hours. When one is ready, a bar at the top says so. Click **Update and restart**. The app closes, installs the update, and opens again. Your settings stay. To check now, open Settings, go to the **App** tab, and click **Check for updates**.
+
+Version 0.1.0 cannot update itself. If you have it, download the newest setup file from the [download page](../../releases/latest) and run it once.
 
 To remove the app, open Windows **Settings**, go to **Apps** > **Installed apps**, find NoPixel Live, and click **Uninstall**.
 
@@ -100,5 +102,7 @@ To remove the app, open Windows **Settings**, go to **Apps** > **Installed apps*
 ## About
 
 NoPixel Live is a fan project. It is not made by or connected to NoPixel, Twitch, or Kick. The NoPixel logo belongs to NoPixel.
+
+The app is free. If you enjoy it, you can support it on [Ko-fi](https://ko-fi.com/ohitsjudd).
 
 To build the app yourself or change the code, see [DEVELOPMENT.md](DEVELOPMENT.md).

@@ -9,9 +9,9 @@
 </script>
 
 <script lang="ts">
-  let { install, oninstall }: { install: InstallState; oninstall: () => void } = $props()
+  import { megabytes } from './format'
 
-  const megabytes = (bytes: number) => Math.round(bytes / 1_000_000)
+  let { install, oninstall }: { install: InstallState; oninstall: () => void } = $props()
 
   let fraction = $derived.by(() => {
     const p = install.progress
